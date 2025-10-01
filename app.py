@@ -1658,9 +1658,7 @@ def inicio():
         active_page="inicio"
     )
 
-
 if __name__ == "__main__":
-
-
-    # Correr Flask normalmente
-    app.run( port=5000)
+    import os
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
