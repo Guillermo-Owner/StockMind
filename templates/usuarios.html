@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Gestión de Usuarios</title>
+<link rel="icon" type="image/x-icon" href="static/icon.png">
+<style>
+/* ====== Global ====== */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f5f5F5;
+}
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 220px;
+  background: linear-gradient(#b2c8e9, #2e78b1, #3ba6f3);
+  border-top-right-radius: 20px;
+  border-bottom-right-radius: 20px;
+  box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  animation: fadeIn 0.8s ease forwards;
+}
+
+.sidebar img.logo {
+  width: 120px;
+  margin: 20px auto;
+  display: block;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 5px 0 0 0;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.sidebar ul li {
+  padding: 0;
+}
+
+.sidebar ul li a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: white;
+  text-decoration: none;
+  width: 100%;
+  padding: 15px;
+  border-radius: 12px;
+  transition: background 0.3s;
+}
+
+.sidebar ul li a:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+.sidebar ul li a.active {
+  background: rgba(255,255,255,0.35);
+  font-weight: bold;
+  border-left: 4px solid #fff;
+  padding-left: 12px;
+}
+
+/* Botón cerrar sesión al final */
+.logout-btn {
+  margin: 20px;
+  background: linear-gradient(to right, #ff4d4d, #ff1a1a);
+  color: #fff;
+  padding: 12px;
+  border-radius: 12px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 15px;
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.3s ease, background 0.3s ease;
+}
+
+.logout-btn:hover {
+  transform: scale(1.05);
+  background: linear-gradient(to right, #ff6666, #e60000);
+  box-shadow: 0 4px 12px rgba(255,0,0,0.4);
+}
+
+
+/* ====== Contenido ====== */
+.content {
+    margin-left: 240px;
+    padding: 20px;
+    opacity: 0;
+    animation: fadeIn 0.8s ease forwards;
+}
+
+h1 {
+    color: #333333;
+    font-size: 25px;
+}
+
+.add-btn {
+    position: fixed;       /* mantiene el botón fijo en la pantalla */
+    top: 100px;             /* distancia desde la parte superior */
+    right: 20px;           /* distancia desde el borde derecho */
+    background: linear-gradient(#007bd4, #3ba6f3);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 30px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    margin-left: 600px;
+}
+
+.add-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0px 4px 10px rgba(0,0,0,0.3);
+}
+
+    /* ====== Modal ====== */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 10;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background: #fff;
+      padding: 25px;
+      border-radius: 20px;
+      width: 420px;
+      max-width: 95%;
+    }
+
+    /* ====== Estilos para los campos del modal ====== */
+.modal-content h2 {
+  text-align: center;
+  color: #007bd4;
+  margin-bottom: 20px;
+  font-size: 1.4rem;
+}
+
+.modal-content form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.modal-content input,
+.modal-content select {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.modal-content input:focus,
+.modal-content select:focus {
+  border-color: #007bd4;
+  box-shadow: 0 0 5px rgba(0,123,212,0.3);
+}
+
+/* Botones del modal */
+.modal-content button {
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.modal-content button[type="submit"] {
+  background: linear-gradient(#007bd4, #3ba6f3);
+  color: white;
+  font-weight: bold;
+}
+
+.modal-content button[type="submit"]:hover {
+  background: linear-gradient(#005a9e, #007bd4);
+  transform: scale(1.03);
+}
+
+.modal-content button[type="button"] {
+  background: #ccc;
+  color: #333;
+}
+
+.modal-content button[type="button"]:hover {
+  background: #aaa;
+  transform: scale(1.03);
+}
+
+
+/* ====== Tabla ====== */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+th {
+    background: #007bd4;
+    color: white;
+    padding: 10px;
+}
+
+td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+}
+
+tr:nth-child(even) {
+    background: #f0f0f0;
+}
+
+/* ====== Buscador ====== */
+#busqueda {
+    padding: 10px;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+    width: 250px;
+    margin-top: 15px;
+}
+
+
+.table-btn {
+    padding: 6px 12px;
+    border-radius: 15px;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+    transition: transform 0.2s, box-shadow 0.2s;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.table-btn.eliminar {
+    background: linear-gradient(to right, #ff4d4d, #ff1a1a);
+}
+
+.table-btn.eliminar:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(255,0,0,0.4);
+}
+
+.table-btn.editar {
+    background: linear-gradient(#b2c8e9,#2e78b1, #3ba6f3);
+}
+
+.table-btn.editar:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0,123,212,0.4);
+}
+
+/* ====== Imágenes ====== */
+.img-hover-container {
+    position: relative;
+    display: inline-block;
+}
+
+.img-hover-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.6);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.img-hover-overlay img {
+    max-width: 80%;
+    max-height: 80%;
+    border: 2px solid #007bd4;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+
+img, .modal-content img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* ====== Responsividad para móviles ====== */
+@media (max-width: 768px) {
+    .sidebar { width: 70px; margin-left: 0; }
+    .sidebar img.logo { width: 50px; margin: 10px auto; }
+    .sidebar ul li { padding: 10px; font-size: 12px; justify-content: center; gap: 5px; }
+    .content { margin-left: 80px; padding: 10px; }
+    #busqueda, .add-btn { width: 48%; padding: 8px; font-size: 14px; margin-left: 0; }
+    table { display: block; overflow-x: auto; width: 100%; }
+    th, td { font-size: 12px; padding: 6px; }
+    .table-btn { font-size: 12px; padding: 4px 6px; }
+    h1 { font-size: 18px; }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" />
+</head>
+<body>
+  <!-- Menú lateral -->
+  <div class="sidebar">
+    <img src="/static/logo.png.png" alt="Escudo" class="logo">
+    <ul>
+      <li>
+        <a href="{{ url_for('inicio') }}" class="{% if active_page == 'inicio' %}active{% endif %}">
+          <i class="fas fa-house"></i> Inicio
+        </a>
+      </li>
+      <li>
+        {% if session.get("rol") in ["administrador", "encargado"] %}
+        <a href="{{ url_for('index') }}" class="{% if active_page == 'index' %}active{% endif %}">
+          <i class="fa-solid fa-boxes-stacked"></i> Inventario
+        </a>
+        {% endif %}
+      </li>
+      <li>
+        {% if session.get("rol") in ["administrador"] %}
+        <a href="{{ url_for('listar_usuarios') }}" class="{% if active_page == 'usuarios' %}active{% endif %}">
+          <i class="fas fa-users"></i> Gestión Usuarios
+        </a>
+        {% endif %}
+      </li>
+      <li>
+        {% if session.get("rol") in ["administrador", "encargado"] %}
+        <a href="{{ url_for('prestamos') }}" class="{% if active_page == 'prestamos' %}active{% endif %}">
+          <i class="fas fa-hand-holding"></i> Préstamos
+        </a>
+        {% endif %}
+      </li>
+      <li>
+        {% if session.get("rol") in ["administrador"] %}
+        <a href="{{ url_for('reportes') }}" class="{% if active_page == 'reportes' %}active{% endif %}">
+          <i class="fas fa-chart-line"></i> Reportes
+        </a>
+        {% endif %}
+      </li>
+      <li>
+        {% if session.get("rol") in ["administrador"] %}
+        <a href="{{ url_for('historial') }}" class="{% if active_page == 'historial' %}active{% endif %}">
+          <i class="fa-solid fa-clock-rotate-left"></i> Historial
+        </a>
+        {% endif %}
+      </li>
+      <li>
+        <a href="{{ url_for('perfil') }}" class="{% if active_page == 'perfil' %}active{% endif %}">
+          <i class="fas fa-user"></i> Perfil
+        </a>
+      </li>
+      <li>
+        <a href="#" class="{% if active_page == 'configuracion' %}active{% endif %}">
+          <i class="fas fa-cog"></i> Configuración
+        </a>
+      </li>
+    </ul>
+    <a href="{{ url_for('logout') }}" class="logout-btn">
+      <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+    </a>
+  </div>
+
+
+
+
+<!-- Contenido principal -->
+<div class="content">
+    <h1>Gestión de Usuarios</h1>
+    <button class="add-btn" onclick="abrirModalAgregar()">➕ Agregar Usuario</button>
+    <input type="text" id="busqueda" placeholder="Buscar por nombre o usuario...">
+    <table id="tabla-usuarios">
+        <thead>
+            <tr>
+                <th>ID</th><th>Nombre</th><th>Usuario</th><th>Rol</th>
+                <th>Teléfono</th><th>Correo</th><th>Dirección</th><th>Foto</th><th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in usuarios %}
+            <tr>
+                <td>{{ user.id_usu }}</td>
+                <td>{{ user.nombre }}</td>
+                <td>{{ user.usuario }}</td>
+                <td>{{ user.rol }}</td>
+                <td>{{ user.telefono }}</td>
+                <td>{{ user.correo }}</td>
+                <td>{{ user.direccion }}</td>
+                <td>
+                    {% if user.foto %}
+                        <img src="{{ url_for('uploads', filename=user.foto) }}" width="50"onclick="abrirImagen('{{ url_for('uploads', filename=user.foto)|safe }}')" onerror="this.src='/static/default.png'">
+                    {% else %}Sin foto{% endif %}
+                </td>
+                <td>
+                    <form action="{{ url_for('eliminar_usuario', id_usu=user.id_usu) }}" method="POST" onsubmit="return confirm('¿Seguro que quieres eliminar?')" style="display:inline;">
+                        <button type="submit" class="table-btn eliminar">
+                            <i class="fas fa-trash-alt"></i> Eliminar
+                        </button>
+                    </form>
+                    <button class="table-btn editar"
+                        data-id="{{ user.id_usu }}"
+                        data-nombre="{{ user.nombre }}"
+                        data-usuario="{{ user.usuario }}"
+                        data-rol="{{ user.rol }}"
+                        data-telefono="{{ user.telefono }}"
+                        data-correo="{{ user.correo }}"
+                        data-direccion="{{ user.direccion }}"
+                        onclick="abrirModalEditar(this)">
+                        <i class="fas fa-pencil-alt"></i> Editar
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Overlay fotos -->
+<div id="imgOverlay" class="img-hover-overlay" onclick="cerrarImagen()">
+    <img id="imgOverlayContent" src="">
+</div>
+
+<!-- Modal Agregar Usuario -->
+<div class="modal" id="modalAgregar">
+    <div class="modal-content">
+        <h2>Agregar Usuario</h2>
+        <form method="POST" action="{{ url_for('agregar_usuario') }}" enctype="multipart/form-data">
+            <input type="text" name="nombre" placeholder="Nombre" required>
+            <input type="text" name="usuario" placeholder="Usuario" required>
+            <input type="number" name="telefono" placeholder="Teléfono" required>
+            <input type="email" name="correo" placeholder="Correo" required>
+            <input type="text" name="direccion" placeholder="Dirección" required>
+            <input type="file" name="foto" accept="image/*">
+            <select name="tipo_usuario" required>
+                <option value="">Seleccione rol</option>
+                <option value="administrador">Administrador</option>
+                <option value="encargado">Encargado</option>
+                <option value="usuario">Usuario</option>
+            </select>
+            <input type="password" name="clave" placeholder="Contraseña" required>
+            <button type="submit">Guardar</button>
+            <button type="button" onclick="cerrarModalAgregar()">Cancelar</button>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Editar Usuario -->
+<div class="modal" id="modalEditar">
+    <div class="modal-content">
+        <h2>Editar Usuario</h2>
+        <form method="POST" action="{{ url_for('editar_usuario') }}" enctype="multipart/form-data">
+            <input type="hidden" name="id_usu" id="editar-id">
+            <input type="text" name="nombre" id="editar-nombre" placeholder="Nombre" required>
+            <input type="text" name="usuario" id="editar-usuario" placeholder="Usuario" required>
+            <input type="number" name="telefono" id="editar-telefono" placeholder="Teléfono" required>
+            <input type="email" name="correo" id="editar-correo" placeholder="Correo" required>
+            <input type="text" name="direccion" id="editar-direccion" placeholder="Dirección" required>
+            <input type="file" name="foto" accept="image/*">
+            <select name="tipo_usuario" id="editar-rol" required>
+                <option value="">Seleccione rol</option>
+                <option value="administrador">Administrador</option>
+                <option value="encargado">Encargado</option>
+                <option value="usuario">Usuario</option>
+            </select>
+            <input type="password" name="clave" placeholder="Nueva Contraseña (opcional)">
+            <button type="submit">Guardar cambios</button>
+            <button type="button" onclick="cerrarModalEditar()">Cancelar</button>
+        </form>
+    </div>
+</div>
+
+<script>
+// Abrir modal editar
+function abrirModalEditar(btn) {
+    document.getElementById('editar-id').value = btn.dataset.id;
+    document.getElementById('editar-nombre').value = btn.dataset.nombre;
+    document.getElementById('editar-usuario').value = btn.dataset.usuario;
+    document.getElementById('editar-rol').value = btn.dataset.rol;
+    document.getElementById('editar-telefono').value = btn.dataset.telefono;
+    document.getElementById('editar-correo').value = btn.dataset.correo;
+    document.getElementById('editar-direccion').value = btn.dataset.direccion;
+    document.getElementById('modalEditar').style.display = 'flex';
+}
+
+function cerrarModalEditar() { document.getElementById('modalEditar').style.display = 'none'; }
+function abrirModalAgregar() { document.getElementById('modalAgregar').style.display = 'flex'; }
+function cerrarModalAgregar() { document.getElementById('modalAgregar').style.display = 'none'; }
+
+// Cerrar modales si clic fuera
+window.onclick = function(event) {
+    if (event.target == document.getElementById('modalAgregar')) cerrarModalAgregar();
+    if (event.target == document.getElementById('modalEditar')) cerrarModalEditar();
+}
+
+// Buscador
+document.getElementById('busqueda').addEventListener('keyup', function() {
+    const filtro = this.value.toLowerCase();
+    const filas = document.querySelectorAll('#tabla-usuarios tbody tr');
+    filas.forEach(fila => {
+        const nombre = fila.cells[1].textContent.toLowerCase();
+        const usuario = fila.cells[2].textContent.toLowerCase();
+        fila.style.display = (nombre.includes(filtro) || usuario.includes(filtro)) ? '' : 'none';
+    });
+});
+
+// Ampliar foto
+function abrirImagen(src) {
+    document.getElementById('imgOverlayContent').src = src;
+    document.getElementById('imgOverlay').style.display = 'flex';
+}
+function cerrarImagen() { document.getElementById('imgOverlay').style.display = 'none'; }
+</script>
+
+</body>
+</html>

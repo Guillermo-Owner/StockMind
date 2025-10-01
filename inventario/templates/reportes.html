@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reportes</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" />
+<link rel="icon" type="image/x-icon" href="static/icon.png">
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+}
+
+/* ====== Menú lateral ====== */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 220px;
+    background: linear-gradient(#005a9e, #3ba6f3);
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar img.logo {
+    width: 120px;
+    margin: 20px auto;
+    display: block;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin-top: 5px;
+    flex-grow: 1;
+}
+
+.sidebar ul li {
+    padding: 15px;
+}
+
+.sidebar ul li a {
+    color: white;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sidebar ul li:hover {
+    background: rgba(255,255,255,0.2);
+    border-radius: 15px;
+}
+
+.sidebar ul li:last-child {
+    margin-top: auto;
+}
+
+.logout-btn {
+    display: inline-block;
+    background: linear-gradient(to right, #ff4d4d, #ff1a1a);
+    color: #ffffff;
+    padding: 10px 20px;
+    border-radius: 30px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 15px;
+    text-align: center;
+}
+
+.logout-btn:hover {
+    background: linear-gradient(to right, #ff6666, #e60000);
+}
+
+/* ====== Contenido ====== */
+.content {
+    margin-left: 240px;
+    padding: 20px;
+}
+
+h1 { color: #007bd4; margin-bottom: 20px; }
+
+.report-section {
+    margin-bottom: 25px;
+}
+
+.report-section h3 {
+    margin-bottom: 10px;
+}
+
+.buttons-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.add-btn {
+    background: linear-gradient(#007bd4, #3ba6f3);
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 25px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    text-decoration: none;
+}
+
+.add-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0px 4px 10px rgba(0,0,0,0.3);
+}
+
+.date-filter {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.date-filter input {
+    padding: 6px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+}
+
+.pdf-container {
+    border: 2px solid #007bd4;
+    border-radius: 15px;
+    overflow: hidden;
+    height: 600px;
+    margin-top: 10px;
+}
+
+.pdf-container iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+</style>
+</head>
+<body>
+
+<!-- Menú lateral -->
+<div class="sidebar">
+    <img src="/static/logo.png.png" alt="Escudo" class="logo">
+    <ul>
+        <li><a href="{{ url_for('index') }}" style="color:white; text-decoration:none;"><i class="fas fa-house"></i> Inicio</a></li>
+        <li><a href="{{ url_for('perfil') }}" style="color:white; text-decoration:none;"><i class="fas fa-user"></i> Perfil</a></li>       
+        <li><a href="{{ url_for('listar_usuarios') }}" style="color:white; text-decoration:none;"><i class="fas fa-users"></i> Perfiles</a></li>
+        <li><a href="{{ url_for('prestamos') }}" style="color:white; text-decoration:none;"><i class="fas fa-hand-holding"></i> Prestamos</a></li>
+        <li><a href="{{ url_for('reportes') }}" style="color:white; text-decoration:none;"><i class="fas fa-chart-line"></i> Reportes</a></li>
+        <li><a href="#" style="color:white; text-decoration:none;"><i class="fas fa-cog"></i> Configuración</a></li>
+        <li style="margin-top:auto; text-align:center;">
+            <a href="{{ url_for('logout') }}" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</a>
+        </li>
+    </ul>
+</div>
+
+
+<div class="content">
+    <h1>📊 Generar Reportes</h1>
+
+    <!-- Reporte de Productos -->
+    <div class="report-section">
+        <h3>Reporte de Productos</h3>
+        <div class="buttons-group">
+            <form method="GET" action="{{ url_for('ver_reporte', tipo='productos') }}" target="visorPDF">
+                <button type="submit" class="add-btn">👀 Ver Reporte</button>
+            </form>
+            <a href="{{ url_for('ver_reporte', tipo='productos') }}?descargar=1" class="add-btn">📥 Descargar</a>
+        </div>
+        <div class="date-filter">
+            <form method="GET" action="{{ url_for('ver_reporte', tipo='productos') }}" target="visorPDF">
+                <label>Desde: <input type="date" name="fecha_inicio" required></label>
+                <label>Hasta: <input type="date" name="fecha_fin" required></label>
+                <button type="submit" class="add-btn">Filtrar por fechas</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Reporte de Usuarios -->
+    <div class="report-section">
+        <h3>Reporte de Usuarios</h3>
+        <div class="buttons-group">
+            <form method="GET" action="{{ url_for('ver_reporte', tipo='usuarios') }}" target="visorPDF">
+                <button type="submit" class="add-btn">👀 Ver Reporte</button>
+            </form>
+            <a href="{{ url_for('ver_reporte', tipo='usuarios') }}?descargar=1" class="add-btn">📥 Descargar</a>
+        </div>
+    </div>
+
+    <!-- Visor PDF -->
+    <div class="pdf-container">
+        <iframe name="visorPDF" src=""></iframe>
+    </div>
+</div>
+
+</body>
+</html>

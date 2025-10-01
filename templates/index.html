@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inventario Escolar</title>
+<link rel="icon" type="image/x-icon" href="static/icon.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" />
+<style>
+/* ====== Global ====== */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+}
+
+/* ====== Animación general ====== */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 220px;
+  background: linear-gradient(#b2c8e9, #2e78b1, #3ba6f3);
+  border-top-right-radius: 20px;
+  border-bottom-right-radius: 20px;
+  box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  animation: fadeIn 0.8s ease forwards;
+}
+
+.sidebar img.logo {
+  width: 120px;
+  margin: 20px auto;
+  display: block;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 5px 0 0 0;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.sidebar ul li {
+  padding: 0;
+}
+
+.sidebar ul li a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: white;
+  text-decoration: none;
+  width: 100%;
+  padding: 15px;
+  border-radius: 12px;
+  transition: background 0.3s;
+}
+
+.sidebar ul li a:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+.sidebar ul li a.active {
+  background: rgba(255,255,255,0.35);
+  font-weight: bold;
+  border-left: 4px solid #fff;
+  padding-left: 12px;
+}
+
+/* Botón cerrar sesión al final */
+.logout-btn {
+  margin: 20px;
+  background: linear-gradient(to right, #ff4d4d, #ff1a1a);
+  color: #fff;
+  padding: 12px;
+  border-radius: 12px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 15px;
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.3s ease, background 0.3s ease;
+}
+
+.logout-btn:hover {
+  transform: scale(1.05);
+  background: linear-gradient(to right, #ff6666, #e60000);
+  box-shadow: 0 4px 12px rgba(255,0,0,0.4);
+}
+
+
+
+/* ====== Contenido ====== */
+.content {
+    margin-left: 240px;
+    padding: 20px;
+    opacity: 0;
+    animation: fadeIn 0.8s ease forwards;
+}
+
+h1 { color: #333; font-size: 25px; }
+
+/* ====== Botón agregar ====== */
+.add-btn {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    background: linear-gradient(#007bd4, #3ba6f3);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 30px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.add-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0px 4px 10px rgba(0,0,0,0.3);
+}
+
+    /* ====== Modal ====== */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 10;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background: #fff;
+      padding: 25px;
+      border-radius: 20px;
+      width: 420px;
+      max-width: 95%;
+    }
+
+    /* ====== Estilos para los campos del modal ====== */
+.modal-content h2 {
+  text-align: center;
+  color: #007bd4;
+  margin-bottom: 20px;
+  font-size: 1.4rem;
+}
+
+.modal-content form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.modal-content input,
+.modal-content select {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.modal-content input:focus,
+.modal-content select:focus {
+  border-color: #007bd4;
+  box-shadow: 0 0 5px rgba(0,123,212,0.3);
+}
+
+/* Botones del modal */
+.modal-content button {
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.modal-content button[type="submit"] {
+  background: linear-gradient(#007bd4, #3ba6f3);
+  color: white;
+  font-weight: bold;
+}
+
+.modal-content button[type="submit"]:hover {
+  background: linear-gradient(#005a9e, #007bd4);
+  transform: scale(1.03);
+}
+
+.modal-content button[type="button"] {
+  background: #ccc;
+  color: #333;
+}
+
+.modal-content button[type="button"]:hover {
+  background: #aaa;
+  transform: scale(1.03);
+}
+
+/* ====== Tabla ====== */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+th {
+    background: #007bd4;
+    color: white;
+    padding: 10px;
+}
+
+td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+}
+
+tr:nth-child(even) { background: #e0e0e0; }
+
+/* ====== Buscador ====== */
+#busqueda {
+    padding: 10px;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+    width: 250px;
+    margin-top: 15px;
+}
+
+/* ====== Botones tabla ====== */
+.table-btn {
+    padding: 6px 12px;
+    border-radius: 15px;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+    transition: transform 0.2s, box-shadow 0.2s;
+    font-size: 14px;
+}
+
+.table-btn.eliminar { background: linear-gradient(to right, #ff4d4d, #ff1a1a); }
+.table-btn.eliminar:hover { transform: scale(1.05); box-shadow: 0 4px 8px rgba(255,0,0,0.4); }
+
+.table-btn.editar { background: linear-gradient(to right, #4da6ff, #1a8cff); }
+.table-btn.editar:hover { transform: scale(1.05); box-shadow: 0 4px 8px rgba(0,123,212,0.4); }
+
+
+
+.img-hover-overlay {
+    display: none; /* oculto por defecto */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7); /* fondo semitransparente */
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    cursor: pointer;
+}
+
+.img-hover-overlay img {
+    max-width: 90%;  /* ocupa hasta 90% del ancho de pantalla */
+    max-height: 90%; /* ocupa hasta 90% del alto de pantalla */
+    border: 2px solid #007bd4;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+
+</style>
+</head>
+<body>
+
+<!-- Menú lateral -->
+<div class="sidebar">
+    <img src="/static/logo.png.png" alt="Escudo" class="logo">
+    <ul>
+      <li>
+        <a href="{{ url_for('inicio') }}" class="{% if active_page == 'inicio' %}active{% endif %}">
+          <i class="fas fa-house"></i> Inicio
+        </a>
+      </li>
+
+      {% if session.get("rol") in ["administrador", "encargado"] %}
+      <li>
+        <a href="{{ url_for('index') }}" class="{% if active_page == 'index' %}active{% endif %}">
+          <i class="fa-solid fa-boxes-stacked"></i> Inventario
+        </a>
+      </li>
+      <li>
+        {% if session.get("rol") in ["administrador"] %}
+        <a href="{{ url_for('listar_usuarios') }}" class="{% if active_page == 'usuarios' %}active{% endif %}">
+          <i class="fas fa-users"></i> Gestión Usuarios
+        </a>
+        {% endif %}
+      </li>
+      <li>
+        <a href="{{ url_for('prestamos') }}" class="{% if active_page == 'prestamos' %}active{% endif %}">
+          <i class="fas fa-hand-holding"></i> Préstamos
+        </a>
+      </li>
+      {% endif %}
+
+      {% if session.get("rol") == "administrador" %}
+      <li>
+        <a href="{{ url_for('reportes') }}" class="{% if active_page == 'reportes' %}active{% endif %}">
+          <i class="fas fa-chart-line"></i> Reportes
+        </a>
+      </li>
+      <li>
+        <a href="{{ url_for('historial') }}" class="{% if active_page == 'historial' %}active{% endif %}">
+          <i class="fa-solid fa-clock-rotate-left"></i> Historial
+        </a>
+      </li>
+      {% endif %}
+
+      <li>
+        <a href="{{ url_for('perfil') }}" class="{% if active_page == 'perfil' %}active{% endif %}">
+          <i class="fas fa-user"></i> Perfil
+        </a>
+      </li>
+      <li>
+        <a href="#" class="{% if active_page == 'configuracion' %}active{% endif %}">
+          <i class="fas fa-cog"></i> Configuración
+        </a>
+      </li>
+    </ul>
+
+    <!-- Botón cerrar sesión siempre abajo -->
+    <a href="{{ url_for('logout') }}" class="logout-btn">
+      <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+    </a>
+</div>
+
+
+
+<!-- Contenido principal -->
+<div class="content">
+    <h1>Inventario</h1>
+    <input type="text" id="busqueda" placeholder="Buscar por nombre...">
+    <button class="add-btn" onclick="document.getElementById('modalAgregar').style.display='flex'">➕ Agregar Producto</button>
+
+    <table id="tabla-productos">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Cantidad</th>
+                <th>Prestados</th>
+                <th>Disponibles</th>
+                <th>Lugar</th>
+                <th>Descripción</th>
+                <th>Estado</th>
+                <th>Imagen</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in productos %}
+            <tr>
+                <td>{{ p.id_prod }}</td>
+                <td>{{ p.nombre|e }}</td>
+                <td>{{ p.cantidad_total }}</td>
+                <td>{{ p.prestados }}</td>
+                <td>{{ p.disponible }}</td>
+                <td>{{ p.lugar|e }}</td>
+                <td title="{{ p.descripcion|e }}">{{ p.descripcion|truncate(60) }}</td>
+                <td>{% if p.activo %}Activo{% else %}Inactivo{% endif %}</td>
+                <td>
+                    {% if p.imagen %}
+                        <img src="{{ url_for('uploads', filename=p.imagen) }}"
+                             width="50"
+                             style="cursor:pointer"onclick="abrirImagen('{{ url_for('uploads', filename=p.imagen) }}')"onerror="this.src='{{ url_for('static', filename='default_prod.png') }}'">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='default_prod.png') }}" width="50">
+                    {% endif %}
+                </td>
+                <td>
+                    {% if p.activo %}
+                        <form action="{{ url_for('eliminar_producto', id_prod=p.id_prod) }}" method="post" style="display:inline">
+                            <button class="table-btn eliminar" type="submit">Desactivar</button>
+                        </form>
+                    {% else %}
+                        <form action="{{ url_for('restaurar_producto', id_prod=p.id_prod) }}" method="post" style="display:inline">
+                            <button class="table-btn editar" type="submit">Restaurar</button>
+                        </form>
+                    {% endif %}
+                    <button class="table-btn editar" type="button"
+                        onclick="abrirModalEditar('{{ p.id_prod }}',
+                                                  '{{ p.nombre }}',
+                                                  '{{ p.cantidad_total }}',
+                                                  '{{ p.lugar }}',
+                                                  '{{ p.descripcion}}')">Editar</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal Agregar -->
+<div class="modal" id="modalAgregar">
+    <div class="modal-content">
+        <h2>Agregar Producto</h2>
+        <form method="POST" action="{{ url_for('agregar') }}" enctype="multipart/form-data">
+            
+            <label>Nombre</label>
+            <input type="text" name="nombre" id="agregar-nombre" placeholder="Nombre" required>
+            <div id="mensaje-existente" style="color:red; font-size:14px; display:none; margin-top:5px;"></div>
+            
+            <label>Cantidad</label>
+            <input type="number" name="cantidad" id="agregar-cantidad" placeholder="Cantidad" required>
+            
+            <label>Lugar</label>
+            <input type="text" name="lugar" id="agregar-lugar" placeholder="Lugar de Almacenamiento" required>
+            
+            <label>Descripción</label>
+            <input type="text" name="descripcion" id="agregar-descripcion" placeholder="Descripción" required>
+            
+            <label>Imagen</label>
+            <input type="file" name="imagen" accept="image/*">
+            
+            <button type="submit">Guardar</button>
+            <button type="button" onclick="document.getElementById('modalAgregar').style.display='none'">Cancelar</button>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Editar -->
+<div class="modal" id="modalEditar">
+    <div class="modal-content">
+        <h2>Editar Producto</h2>
+        <form method="POST" action="{{ url_for('actualizar_producto') }}" enctype="multipart/form-data">
+            <input type="hidden" name="id_prod" id="editar-id">
+            
+            <label>Nombre</label>
+            <input type="text" name="nombre" id="editar-nombre" placeholder="Nombre" required>
+            
+            <label>Cantidad</label>
+            <input type="number" name="cantidad" id="editar-cantidad" placeholder="Cantidad" required>
+            
+            <label>Lugar</label>
+            <input type="text" name="lugar" id="editar-lugar" placeholder="Lugar de Almacenamiento" required>
+            
+            <label>Descripción</label>
+            <input type="text" name="descripcion" id="editar-descripcion" placeholder="Descripción" required>
+            
+            <label>Imagen (opcional)</label>
+            <input type="file" name="imagen" accept="image/*">
+            
+            <button type="submit">Guardar cambios</button>
+            <button type="button" onclick="cerrarModalEditar()">Cancelar</button>
+        </form>
+    </div>
+</div>
+
+
+
+<script>
+    // === Verificación de producto existente en modal agregar ===
+document.getElementById('agregar-nombre').addEventListener('blur', function() {
+    const nombre = this.value.trim();
+    const mensajeDiv = document.getElementById('mensaje-existente');
+
+    if (nombre.length > 0) {
+        fetch(`/StockMind/buscar_producto?nombre=${encodeURIComponent(nombre)}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.existe) {
+                    mensajeDiv.style.display = 'block';
+                    mensajeDiv.innerHTML = `⚠️ El producto <b>${data.nombre}</b> ya existe con <b>${data.cantidad}</b> unidades.`;
+
+                    // Rellenar los otros campos con la info existente
+                    document.getElementById("agregar-cantidad").value = data.cantidad;
+                    document.getElementById("agregar-lugar").value = data.lugar;
+                    document.getElementById("agregar-descripcion").value = data.descripcion;
+                } else {
+                    mensajeDiv.style.display = 'none';
+                    mensajeDiv.innerHTML = "";
+                    // Vaciar campos si era un producto existente antes
+                    document.getElementById("agregar-cantidad").value = "";
+                    document.getElementById("agregar-lugar").value = "";
+                    document.getElementById("agregar-descripcion").value = "";
+                }
+            })
+            .catch(err => {
+                console.error("Error consultando producto:", err);
+            });
+    } else {
+        mensajeDiv.style.display = 'none';
+    }
+});
+document.getElementById('busqueda').addEventListener('keyup', function() {
+    const filtro = this.value.toLowerCase();
+    const filas = document.querySelectorAll('#tabla-productos tbody tr');
+    filas.forEach(fila => {
+        const nombre = fila.cells[1].textContent.toLowerCase();
+        fila.style.display = nombre.includes(filtro) ? '' : 'none';
+    });
+});
+
+function abrirModalEditar(id, nombre, cantidad, lugar, descripcion) {
+    document.getElementById('editar-id').value = id;
+    document.getElementById('editar-nombre').value = nombre;
+    document.getElementById('editar-cantidad').value = cantidad;
+    document.getElementById('editar-lugar').value = lugar;
+    document.getElementById('editar-descripcion').value = descripcion;
+    document.getElementById('modalEditar').style.display = 'flex';
+}
+
+
+
+window.onclick = function(event) {
+    if(event.target==document.getElementById('modalAgregar')) document.getElementById('modalAgregar').style.display='none';
+    if(event.target==document.getElementById('modalEditar')) document.getElementById('modalEditar').style.display='none';
+}
+
+function abrirImagen(src) {
+    const overlay = document.getElementById('imgOverlay');
+    const img = document.getElementById('imgOverlayContent');
+    img.src = src;
+    overlay.style.display = 'flex'; // muestra el overlay
+}
+
+function cerrarImagen() {
+    document.getElementById('imgOverlay').style.display = 'none';
+}
+
+</script>
+
+<!-- Overlay global -->
+<div id="imgOverlay" class="img-hover-overlay" onclick="cerrarImagen()">
+    <img id="imgOverlayContent" src="">
+</div>
+
+
+</body>
+</html>

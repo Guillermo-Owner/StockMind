@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Gestión de Usuarios</title>
+<link rel="icon" type="image/x-icon" href="static/icon.png">
+<style>
+/* ====== Global ====== */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f5f5dc;
+}
+
+/* ====== Menú lateral ====== */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 220px;
+    background: linear-gradient(#007bd4, #3ba6f3);
+    overflow: hidden;
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    animation: fadeIn 0.8s ease forwards;
+}
+
+.sidebar img.logo {
+    width: 60px;
+    margin: 15px auto;
+    display: block;
+    border-radius: 50%;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.sidebar ul li {
+    padding: 15px;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.3s;
+}
+
+.sidebar ul li:hover {
+    background: rgba(255,255,255,0.2);
+    border-radius: 15px;
+}
+
+.sidebar ul li:last-child {
+    margin-top: auto;
+}
+
+.sidebar ul li:last-child:hover {
+    background: none;
+}
+
+/* ====== Contenido ====== */
+.content {
+    margin-left: 240px;
+    padding: 20px;
+    opacity: 0;
+    animation: fadeIn 0.8s ease forwards;
+}
+
+h1 {
+    color: #007bd4;
+    font-size: 20px;
+}
+
+/* ====== Botón agregar ====== */
+.add-btn {
+    background: linear-gradient(#007bd4, #3ba6f3);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 30px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    margin-left: 600px;
+}
+
+.add-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0px 4px 10px rgba(0,0,0,0.3);
+}
+
+/* ====== Modal ====== */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 10;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: #f5f5dc;
+    padding: 20px;
+    border-radius: 20px;
+    width: 400px;
+    max-width: 90%;
+}
+
+.modal-content h2 {
+    margin-top: 0;
+    color: #007bd4;
+}
+
+.modal-content input, .modal-content button, .modal-content select {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+}
+
+.modal-content button {
+    background: linear-gradient(#007bd4, #3ba6f3);
+    color: white;
+    border: none;
+}
+
+/* ====== Tabla ====== */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+th {
+    background: #007bd4;
+    color: white;
+    padding: 10px;
+}
+
+td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+}
+
+tr:nth-child(even) {
+    background: #f0f0f0;
+}
+
+/* ====== Buscador ====== */
+#busqueda {
+    padding: 10px;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+    width: 250px;
+    margin-top: 15px;
+}
+
+/* ====== Botones ====== */
+.logout-btn {
+    display: inline-block;
+    background: linear-gradient(to right, #ff4d4d, #ff1a1a);
+    color: #ffffff;
+    padding: 10px 20px;
+    border-radius: 30px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 15px;
+    transition: transform 0.2s ease, box-shadow 0.3s ease, background 0.3s ease;
+    text-align: center;
+}
+
+.logout-btn:hover {
+    transform: scale(1.05);
+    background: linear-gradient(to right, #ff6666, #e60000);
+    box-shadow: 0 4px 12px rgba(255,0,0,0.4);
+}
+
+.table-btn {
+    padding: 6px 12px;
+    border-radius: 15px;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+    transition: transform 0.2s, box-shadow 0.2s;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.table-btn.eliminar {
+    background: linear-gradient(to right, #ff4d4d, #ff1a1a);
+}
+
+.table-btn.eliminar:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(255,0,0,0.4);
+}
+
+.table-btn.editar {
+    background: linear-gradient(to right, #4da6ff, #1a8cff);
+}
+
+.table-btn.editar:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0,123,212,0.4);
+}
+
+/* ====== Imágenes ====== */
+.img-hover-container {
+    position: relative;
+    display: inline-block;
+}
+
+.img-hover-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.6);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.img-hover-overlay img {
+    max-width: 80%;
+    max-height: 80%;
+    border: 2px solid #007bd4;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+
+img, .modal-content img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* ====== Responsividad para móviles ====== */
+@media (max-width: 768px) {
+    .sidebar { width: 70px; margin-left: 0; }
+    .sidebar img.logo { width: 50px; margin: 10px auto; }
+    .sidebar ul li { padding: 10px; font-size: 12px; justify-content: center; gap: 5px; }
+    .content { margin-left: 80px; padding: 10px; }
+    #busqueda, .add-btn { width: 48%; padding: 8px; font-size: 14px; margin-left: 0; }
+    table { display: block; overflow-x: auto; width: 100%; }
+    th, td { font-size: 12px; padding: 6px; }
+    .table-btn { font-size: 12px; padding: 4px 6px; }
+    h1 { font-size: 18px; }
+}
+
+/* Animación general */
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" />
+</head>
+<body>
+
+<!-- Menú lateral -->
+<div class="sidebar">
+    <img src="/static/logo.png.png" alt="Escudo" class="logo">
+    <ul>
+        <li><a href="{{ url_for('index') }}" style="color:white; text-decoration:none;"><i class="fas fa-house"></i> Inicio</a></li>
+        <li><a href="{{ url_for('perfil') }}" style="color:white; text-decoration:none;"><i class="fas fa-user"></i> Perfil</a></li>       
+        <li><a href="{{ url_for('listar_usuarios') }}" style="color:white; text-decoration:none;"><i class="fas fa-users"></i> Perfiles</a></li>
+        <li><a href="{{ url_for('prestamos') }}" style="color:white; text-decoration:none;"><i class="fas fa-hand-holding"></i> Prestamos</a></li>
+        <li><a href="{{ url_for('reportes') }}" style="color:white; text-decoration:none;"><i class="fas fa-chart-line"></i> Reportes</a></li>
+        <li><a href="#" style="color:white; text-decoration:none;"><i class="fas fa-cog"></i> Configuración</a></li>
+        <li style="margin-top:auto; text-align:center;">
+            <a href="{{ url_for('logout') }}" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</a>
+        </li>
+    </ul>
+</div>
+
+
+<!-- Contenido principal -->
+<div class="content">
+    <h1>Gestión de Usuarios</h1>
+    <button class="add-btn" onclick="abrirModalAgregar()">➕ Agregar Usuario</button>
+    <input type="text" id="busqueda" placeholder="Buscar por nombre o usuario...">
+    <table id="tabla-usuarios">
+        <thead>
+            <tr>
+                <th>ID</th><th>Nombre</th><th>Usuario</th><th>Rol</th>
+                <th>Teléfono</th><th>Correo</th><th>Dirección</th><th>Foto</th><th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in usuarios %}
+            <tr>
+                <td>{{ user.id_usu }}</td>
+                <td>{{ user.nombre }}</td>
+                <td>{{ user.usuario }}</td>
+                <td>{{ user.rol }}</td>
+                <td>{{ user.telefono }}</td>
+                <td>{{ user.correo }}</td>
+                <td>{{ user.direccion }}</td>
+                <td>
+                    {% if user.foto %}
+                        <img src="{{ url_for('uploads', filename=user.foto) }}" width="50"onclick="abrirImagen('{{ url_for('uploads', filename=user.foto)|safe }}')" onerror="this.src='/static/default.png'">
+                    {% else %}Sin foto{% endif %}
+                </td>
+                <td>
+                    <a href="{{ url_for('eliminar_usuario', id_usu=user.id_usu) }}" onclick="return confirm('¿Seguro que quieres eliminar?')" class="table-btn eliminar">
+                        <i class="fas fa-trash-alt"></i> Eliminar
+                    </a>
+                    <button class="table-btn editar"
+                        data-id="{{ user.id_usu }}"
+                        data-nombre="{{ user.nombre }}"
+                        data-usuario="{{ user.usuario }}"
+                        data-rol="{{ user.rol }}"
+                        data-telefono="{{ user.telefono }}"
+                        data-correo="{{ user.correo }}"
+                        data-direccion="{{ user.direccion }}"
+                        onclick="abrirModalEditar(this)">
+                        <i class="fas fa-pencil-alt"></i> Editar
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Overlay fotos -->
+<div id="imgOverlay" class="img-hover-overlay" onclick="cerrarImagen()">
+    <img id="imgOverlayContent" src="">
+</div>
+
+<!-- Modal Agregar Usuario -->
+<div class="modal" id="modalAgregar">
+    <div class="modal-content">
+        <h2>Agregar Usuario</h2>
+        <form method="POST" action="{{ url_for('agregar_usuario') }}" enctype="multipart/form-data">
+            <input type="text" name="nombre" placeholder="Nombre" required>
+            <input type="text" name="usuario" placeholder="Usuario" required>
+            <input type="number" name="telefono" placeholder="Teléfono" required>
+            <input type="email" name="correo" placeholder="Correo" required>
+            <input type="text" name="direccion" placeholder="Dirección" required>
+            <input type="file" name="foto" accept="image/*">
+            <select name="tipo_usuario" required>
+                <option value="">Seleccione rol</option>
+                <option value="administrador">Administrador</option>
+                <option value="encargado">Encargado</option>
+                <option value="usuario">Usuario</option>
+            </select>
+            <input type="password" name="clave" placeholder="Contraseña" required>
+            <button type="submit">Guardar</button>
+            <button type="button" onclick="cerrarModalAgregar()">Cancelar</button>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Editar Usuario -->
+<div class="modal" id="modalEditar">
+    <div class="modal-content">
+        <h2>Editar Usuario</h2>
+        <form method="POST" action="{{ url_for('editar_usuario') }}" enctype="multipart/form-data">
+            <input type="hidden" name="id_usu" id="editar-id">
+            <input type="text" name="nombre" id="editar-nombre" placeholder="Nombre" required>
+            <input type="text" name="usuario" id="editar-usuario" placeholder="Usuario" required>
+            <input type="number" name="telefono" id="editar-telefono" placeholder="Teléfono" required>
+            <input type="email" name="correo" id="editar-correo" placeholder="Correo" required>
+            <input type="text" name="direccion" id="editar-direccion" placeholder="Dirección" required>
+            <input type="file" name="foto" accept="image/*">
+            <select name="tipo_usuario" id="editar-rol" required>
+                <option value="">Seleccione rol</option>
+                <option value="administrador">Administrador</option>
+                <option value="encargado">Encargado</option>
+                <option value="usuario">Usuario</option>
+            </select>
+            <input type="password" name="clave" placeholder="Nueva Contraseña (opcional)">
+            <button type="submit">Guardar cambios</button>
+            <button type="button" onclick="cerrarModalEditar()">Cancelar</button>
+        </form>
+    </div>
+</div>
+
+<script>
+// Abrir modal editar
+function abrirModalEditar(btn) {
+    document.getElementById('editar-id').value = btn.dataset.id;
+    document.getElementById('editar-nombre').value = btn.dataset.nombre;
+    document.getElementById('editar-usuario').value = btn.dataset.usuario;
+    document.getElementById('editar-rol').value = btn.dataset.rol;
+    document.getElementById('editar-telefono').value = btn.dataset.telefono;
+    document.getElementById('editar-correo').value = btn.dataset.correo;
+    document.getElementById('editar-direccion').value = btn.dataset.direccion;
+    document.getElementById('modalEditar').style.display = 'flex';
+}
+
+function cerrarModalEditar() { document.getElementById('modalEditar').style.display = 'none'; }
+function abrirModalAgregar() { document.getElementById('modalAgregar').style.display = 'flex'; }
+function cerrarModalAgregar() { document.getElementById('modalAgregar').style.display = 'none'; }
+
+// Cerrar modales si clic fuera
+window.onclick = function(event) {
+    if (event.target == document.getElementById('modalAgregar')) cerrarModalAgregar();
+    if (event.target == document.getElementById('modalEditar')) cerrarModalEditar();
+}
+
+// Buscador
+document.getElementById('busqueda').addEventListener('keyup', function() {
+    const filtro = this.value.toLowerCase();
+    const filas = document.querySelectorAll('#tabla-usuarios tbody tr');
+    filas.forEach(fila => {
+        const nombre = fila.cells[1].textContent.toLowerCase();
+        const usuario = fila.cells[2].textContent.toLowerCase();
+        fila.style.display = (nombre.includes(filtro) || usuario.includes(filtro)) ? '' : 'none';
+    });
+});
+
+// Ampliar foto
+function abrirImagen(src) {
+    document.getElementById('imgOverlayContent').src = src;
+    document.getElementById('imgOverlay').style.display = 'flex';
+}
+function cerrarImagen() { document.getElementById('imgOverlay').style.display = 'none'; }
+</script>
+
+</body>
+</html>

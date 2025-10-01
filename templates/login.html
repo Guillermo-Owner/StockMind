@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Inicio de Sesion</title>
+  <link rel="stylesheet" href="/static/estilo.css">
+  <link rel="icon" type="image/x-icon" href="static/icon.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    .logo{
+      width: 100%;
+    }
+
+    .password-container {
+        position: relative;
+        width: 250px;
+    }
+
+    input[type="password"], input[type="text"] {
+        width: 100%;
+        padding: 10px 40px 10px 10px;
+        font-size: 16px;
+    }
+
+    .toggle-password {
+        position: absolute;
+        top: 50%;
+        right: 10px;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #007bd4;
+    }
+
+    .toggle-password:hover {
+        color: #000000;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="form-box">
+      <div class="form-left">
+        <h2>Hola!!</h2>
+        <p>Por favor inicia sesion </p>
+        <form method="POST" action="/StockMind/login">
+            <div class="input-group">
+                <select name="tipo_usuario" required style="width: 100%; padding: 15px; border-radius: 30px; border: 2px solid #3ba6f3; background: #ffffff; font-size: 16px;">
+                    <option value="" disabled selected>Selecciona tu rol</option>
+                    <option value="usuario">Usuario</option>
+                    <option value="administrador">Administrador</option>
+                    <option value="encargado">Encargado</option>
+                </select>
+             </div>
+          <div class="input-group">
+            <input type="text" name="usuario" placeholder="Usuario" required>
+
+          </div>
+          <div class="input-group">
+              <input type="password" name="clave" id="password" placeholder="Escribe tu contraseña">
+              <i class="fa-solid fa-eye toggle-password" id="togglePassword"></i>
+          </div>
+          <button type="submit" class="btn">Iniciar sesion</button>
+        </form>
+          {% if error %}
+          <div style="color: red; font-weight: bold; margin-bottom: 10px;">
+            {{ error }}
+          </div>
+          {% endif %}
+      </div>
+      <div class="form-right">
+        <img class="logo" src="/static/logo.png.png" alt="">
+      </div>
+    </div>
+  </div>
+<script>
+    const togglePassword = document.getElementById("togglePassword");
+    const password = document.getElementById("password");
+
+    togglePassword.addEventListener("click", () => {
+        const type = password.getAttribute("type") === "password" ? "text" : "password";
+        password.setAttribute("type", type);
+        // Cambiar el icono
+        togglePassword.classList.toggle("fa-eye");
+        togglePassword.classList.toggle("fa-eye-slash");
+    });
+</script>
+</body>
+</html>

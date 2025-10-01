@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Préstamos - Inventario Escolar</title>
+<link rel="icon" type="image/x-icon" href="/static/icon.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" />
+<style>
+/* ====== Global ====== */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+}
+
+/* ====== Menú lateral ====== */
+.sidebar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 100%;
+    width: 220px;
+    background: linear-gradient(#005a9e, #3ba6f3);
+    overflow: hidden;
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar img.logo {
+    width: 120px;
+    margin: 20px auto;
+    display: block;
+    border-radius: 0%;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin-top: 5px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.sidebar ul li {
+    padding: 15px;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.3s;
+}
+
+.sidebar ul li:hover {
+    background: rgba(255,255,255,0.2);
+    border-radius: 15px;
+}
+
+.sidebar ul li:last-child { margin-top: auto; }
+
+/* ====== Contenido ====== */
+.content {
+    margin-left: 240px;
+    padding: 20px;
+}
+
+h1 {
+    color: #333333;
+    font-size: 25px;
+}
+
+/* ====== Botón agregar ====== */
+.add-btn {
+    background: linear-gradient(#007bd4, #3ba6f3);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 30px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    margin-bottom: 10px;
+}
+
+.add-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0px 4px 10px rgba(0,0,0,0.3);
+}
+
+/* ====== Tabla ====== */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+th {
+    background: #007bd4;
+    color: white;
+    padding: 10px;
+}
+
+td {
+    padding: 8px;
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+}
+
+tr:nth-child(even) { background: #e0e0e0; }
+
+/* ====== Buscador ====== */
+#busqueda {
+    padding: 10px;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+    width: 250px;
+    margin-bottom: 10px;
+}
+
+/* ====== Botones ====== */
+.table-btn {
+    padding: 5px 10px;
+    border-radius: 15px;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.table-btn.devolver { background: linear-gradient(to right, #4da6ff, #1a8cff); }
+.table-btn.devolver:hover { transform: scale(1.05); }
+
+.logout-btn {
+    display: inline-block;
+    background: linear-gradient(to right, #ff4d4d, #ff1a1a);
+    color: #ffffff;
+    padding: 10px 20px;
+    border-radius: 30px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 15px;
+}
+
+.logout-btn:hover { background: linear-gradient(to right, #ff6666, #e60000); }
+
+/* ====== Modal ====== */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 10;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: #f5f5dc;
+    padding: 20px;
+    border-radius: 20px;
+    width: 400px;
+    max-width: 90%;
+}
+
+.modal-content h2 { color: #007bd4; margin-top: 0; }
+
+.modal-content input, .modal-content select, .modal-content button {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+}
+
+.modal-content button {
+    background: linear-gradient(#007bd4, #3ba6f3);
+    color: white;
+    border: none;
+}
+</style>
+</head>
+<body>
+
+<!-- Menú lateral -->
+<div class="sidebar">
+    <img src="/static/logo.png.png" alt="Escudo" class="logo">
+    <ul>
+        <li><a href="{{ url_for('index') }}" style="color:white; text-decoration:none;"><i class="fas fa-house"></i> Inicio</a></li>
+        <li><a href="{{ url_for('perfil') }}" style="color:white; text-decoration:none;"><i class="fas fa-user"></i> Perfil</a></li>       
+        <li><a href="{{ url_for('listar_usuarios') }}" style="color:white; text-decoration:none;"><i class="fas fa-users"></i> Perfiles</a></li>
+        <li><a href="{{ url_for('prestamos') }}" style="color:white; text-decoration:none;"><i class="fas fa-hand-holding"></i> Prestamos</a></li>
+        <li><a href="{{ url_for('reportes') }}" style="color:white; text-decoration:none;"><i class="fas fa-chart-line"></i> Reportes</a></li>
+        <li><a href="#" style="color:white; text-decoration:none;"><i class="fas fa-cog"></i> Configuración</a></li>
+        <li style="margin-top:auto; text-align:center;">
+            <a href="{{ url_for('logout') }}" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</a>
+        </li>
+    </ul>
+</div>
+
+<!-- Contenido principal -->
+<div class="content">
+    <h1>Préstamos</h1>
+
+    <!-- Buscador -->
+    <input type="text" id="busqueda" placeholder="Buscar por usuario o producto...">
+    <button class="add-btn" onclick="document.getElementById('modalAgregarPrestamo').style.display='flex'">➕ Registrar Préstamo</button>
+
+    <!-- Tabla de préstamos -->
+    <table id="tabla-prestamos">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Usuario</th>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Fecha Préstamo</th>
+                <th>Fecha Devolución</th>
+                <th>Estado</th>
+                <th>Acción</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for pr in prestamos %}
+            <tr>
+                <td>{{ pr.id_prestamo }}</td>
+                <td>{{ pr.usuario }}</td>
+                <td>{{ pr.producto }}</td>
+                <td>{{ pr.cantidad }}</td>
+                <td>{{ pr.fecha_prestamo }}</td>
+                <td>{{ pr.fecha_devolucion }}</td>
+                <td>{{ pr.estado }}</td>
+                <td>
+                    {% if pr.estado == 'pendiente' %}
+                    <form method="POST" action="{{ url_for('devolucion') }}">
+                        <input type="hidden" name="id_prestamo" value="{{ pr.id_prestamo }}">
+                        <select name="estado" required>
+                            <option value="devuelto">Devuelto</option>
+                            <option value="dañado">Dañado</option>
+                        </select>
+                        <button type="submit" class="table-btn devolver">Registrar devolución</button>
+                    </form>
+                    {% else %}
+                        {{ pr.estado|capitalize }}
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal registrar préstamo -->
+<div class="modal" id="modalAgregarPrestamo">
+    <div class="modal-content">
+        <h2>Registrar Préstamo</h2>
+        <form method="POST" action="{{ url_for('registrar_prestamo') }}">
+            <label>Usuario</label>
+            <select name="usuario" required>
+                {% for u in usuarios %}
+                    <option value="{{ u.id_usu }}">{{ u.nombre }}</option>
+                {% endfor %}
+            </select>
+            <label>Producto</label>
+            <select name="producto" required>
+                {% for p in productos %}
+                    <option value="{{ p.id_prod }}">{{ p.nombre }} ({{ p.cantidad }} disponibles)</option>
+                {% endfor %}
+            </select>
+            <label>Cantidad</label>
+            <input type="number" name="cantidad" min="1" required>
+            <label>Fecha de Préstamo</label>
+            <input type="date" name="fecha_prestamo" required>
+            <label>Fecha de Devolución</label>
+            <input type="date" name="fecha_devolucion" required>
+            <button type="submit">Registrar</button>
+            <button type="button" onclick="document.getElementById('modalAgregarPrestamo').style.display='none'">Cancelar</button>
+        </form>
+    </div>
+</div>
+
+<script>
+document.getElementById('busqueda').addEventListener('keyup', function() {
+    const filtro = this.value.toLowerCase();
+    const filas = document.querySelectorAll('#tabla-prestamos tbody tr');
+    filas.forEach(fila => {
+        const usuario = fila.cells[1].textContent.toLowerCase();
+        const producto = fila.cells[2].textContent.toLowerCase();
+        fila.style.display = (usuario.includes(filtro) || producto.includes(filtro)) ? '' : 'none';
+    });
+});
+
+function abrirModalDevolucion(id, usuario, producto, cantidad) {
+    document.getElementById('devolucion-id').value = id;
+    document.getElementById('modalDevolucion').style.display = 'flex';
+}
+
+function cerrarModalDevolucion() {
+    document.getElementById('modalDevolucion').style.display = 'none';
+}
+
+window.onclick = function(event) {
+    const modalAgregar = document.getElementById('modalAgregarPrestamo');
+    const modalDevolver = document.getElementById('modalDevolucion');
+    if (event.target == modalAgregar) modalAgregar.style.display = 'none';
+    if (event.target == modalDevolver) modalDevolver.style.display = 'none';
+}
+</script>
+
+</body>
+</html>
