@@ -24,10 +24,6 @@ from psycopg2.extras import RealDictCursor
 import smtplib
 from email.mime.text import MIMEText
 
-utc_now = datetime.utcnow()  # Hora en UTC
-colombia = pytz.timezone("America/Bogota")
-hora_local = utc_now.astimezone(colombia)
-
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "clave_super_secreta")
 
