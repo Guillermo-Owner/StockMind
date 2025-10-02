@@ -1658,6 +1658,13 @@ def inicio():
         active_page="inicio"
     )
 
+    @app.route("/StockMind/configuracion")
+def configuracion():
+    if "id_usuario" not in session:
+        return redirect(url_for("login"))
+    return render_template("configuracion.html", active_page="configuracion")
+
+
 if __name__ == "__main__":
     import os
     port = int(os.environ.get("PORT", 5000))
