@@ -1658,7 +1658,7 @@ def inicio():
         active_page="inicio"
     )
 
-    @app.route("/StockMind/configuracion")
+@app.route("/StockMind/configuracion")
 def configuracion():
     if "id_usuario" not in session:
         return redirect(url_for("login"))
