@@ -378,7 +378,7 @@ img, .modal-content img {
         </a>
       </li>
       <li>
-        <a href="#" class="{% if active_page == 'configuracion' %}active{% endif %}">
+        <a href="{{ url_for('configuracion') }}" class="{% if active_page == 'configuracion' %}active{% endif %}">
           <i class="fas fa-cog"></i> Configuración
         </a>
       </li>
